@@ -57,21 +57,21 @@ enum List[A]:
       case (_, (accumulator, listOfIndices)) => (accumulator - 1, accumulator :: listOfIndices)
     }._2
 
-  private def zipWithCounter(counterLogic: Int => Int, startingPoint: Int): List[(A, Int)] =
+  private def zipCounterFromRight(counterLogic: Int => Int, startingPoint: Int): List[(A, Int)] =
     this.foldRight[(Int, List[(A, Int)])](startingPoint, Nil()) {
       case (originalElement, (accumulator, listWithIndices)) => (counterLogic(accumulator), (originalElement, accumulator) :: listWithIndices)
     }._2
 
   def zipWithIndex: List[(A, Int)] =
-    zipWithCounter((_-1),this.length() - 1)
+    zipCounterFromRight((_-1),this.length() - 1)
 
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
 
   def takeRight(n: Int): List[A] =
-    zipWithCounter((_+1),0)
-    .filter((elem,index) => index < n)
-    .map((elem,index) => elem)
+    zipCounterFromRight((_+1),0)
+    .filter((_,index) => index < n)
+    .map((element,index) => element)
 
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
