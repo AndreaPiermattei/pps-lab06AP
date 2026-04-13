@@ -34,7 +34,7 @@ enum List[A]:
     foldRight(list)(_ :: _)
 
   def flatMap[B](f: A => List[B]): List[B] =
-    foldRight(Nil())(f(_) append _)
+    foldLeft(Nil())((list,value)=>list.append(f(value)))
 
   def filter(predicate: A => Boolean): List[A] = flatMap(a => if predicate(a) then a :: Nil() else Nil())
 
@@ -45,14 +45,23 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
   
   // Exercise: implement the following methods
-  def zipWithValue[B](value: B): List[(A, B)] = ???
+  def zipWithValue[B](value: B): List[(A, B)] =
+    this.foldRight(Nil()) {
+      case (elem,listWithValue) => ( (elem, value) :: listWithValue)
+    }
   def length(): Int =
-    var counterElements = 0
-    this.foreach(element => counterElements=counterElements+1)
-    counterElements
+    this.foldLeft(0)((lengthCounter, _)=>lengthCounter+1)
 
-  def indices(): List[Int] = ???
-  def zipWithIndex: List[(A, Int)] = ???
+  def indices(): List[Int] =
+    this.foldRight[(Int, List[Int])](this.length() - 1, Nil()) {
+      case (_, (accumulator, listOfIndices)) => (accumulator - 1, accumulator :: listOfIndices)
+    }._2
+
+  def zipWithIndex: List[(A, Int)] =
+    this.foldRight[(Int, List[(A,Int)])](this.length() - 1, Nil()) {
+      case (elem, (accumulator, listWithIndices)) => (accumulator - 1, (elem,accumulator) :: listWithIndices)
+    }._2
+
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
@@ -70,11 +79,12 @@ object List:
 
 object Test extends App:
   import List.*
-  val reference = List(1, 2, 3, 4)
+  private val reference = List(1, 2, 3, 4)
   println(reference.length()) // 4
-  println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.indices()) // List(0, 1, 2, 3)
+  println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
+
   println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
   println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
   println(reference.span(_ < 3)) // (List(1, 2), List(3, 4))
