@@ -59,7 +59,7 @@ enum List[A]:
 
   private def zipCounterFromRight(counterLogic: Int => Int, startingPoint: Int): List[(A, Int)] =
     this.foldRight[(Int, List[(A, Int)])](startingPoint, Nil()) {
-      case (originalElement, (accumulator, listWithIndices)) => (counterLogic(accumulator), (originalElement, accumulator) :: listWithIndices)
+      case (originalElement, (accumulator, list)) => (counterLogic(accumulator), (originalElement, accumulator) :: list)
     }._2
 
   def zipWithIndex: List[(A, Int)] =
