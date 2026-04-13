@@ -47,7 +47,7 @@ enum List[A]:
   // Exercise: implement the following methods
   def zipWithValue[B](value: B): List[(A, B)] =
     this.foldRight(Nil()) {
-      case (elem,listWithValue) => ( (elem, value) :: listWithValue)
+      case (elem,listWithValue) => (elem, value) :: listWithValue
     }
   def length(): Int =
     this.foldLeft(0)((lengthCounter, _)=>lengthCounter+1)
