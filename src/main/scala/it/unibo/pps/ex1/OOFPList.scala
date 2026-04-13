@@ -57,14 +57,22 @@ enum List[A]:
       case (_, (accumulator, listOfIndices)) => (accumulator - 1, accumulator :: listOfIndices)
     }._2
 
-  def zipWithIndex: List[(A, Int)] =
-    this.foldRight[(Int, List[(A,Int)])](this.length() - 1, Nil()) {
-      case (elem, (accumulator, listWithIndices)) => (accumulator - 1, (elem,accumulator) :: listWithIndices)
+  private def zipWithCounter(counterLogic: Int => Int, startingPoint: Int): List[(A, Int)] =
+    this.foldRight[(Int, List[(A, Int)])](startingPoint, Nil()) {
+      case (originalElement, (accumulator, listWithIndices)) => (counterLogic(accumulator), (originalElement, accumulator) :: listWithIndices)
     }._2
+
+  def zipWithIndex: List[(A, Int)] =
+    zipWithCounter((_-1),this.length() - 1)
 
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
-  def takeRight(n: Int): List[A] = ???
+
+  def takeRight(n: Int): List[A] =
+    zipWithCounter((_+1),0)
+    .filter((elem,index) => index < n)
+    .map((elem,index) => elem)
+
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
 object List:
@@ -84,9 +92,9 @@ object Test extends App:
   println(reference.indices()) // List(0, 1, 2, 3)
   println(reference.zipWithValue(10)) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
+  println(reference.takeRight(3)) // List(2, 3, 4)
 
   println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
   println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
   println(reference.span(_ < 3)) // (List(1, 2), List(3, 4))
-  println(reference.takeRight(3)) // List(2, 3, 4)
   println(reference.collect { case x if x % 2 == 0 => x + 1 }) // List(3, 5)
